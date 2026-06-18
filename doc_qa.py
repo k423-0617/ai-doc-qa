@@ -8,8 +8,32 @@ import os
 import requests
 import json
 
-# ============ 配置 ============
-API_KEY = "sk-3f7faf43659e4f51b9eed45ae8117f4d"
+# ============ 配置文件路径 ============
+CONFIG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.json")
+
+def load_config():
+    """加载配置，如果没有则提示用户输入"""
+    if os.path.exists(CONFIG_FILE):
+        with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
+
+    # 第一次运行，询问密钥
+    print("=" * 50)
+    print("  首次运行，请配置 DeepSeek API 密钥")
+    print("  密钥获取地址：https://platform.deepseek.com/api_keys")
+    print("=" * 50)
+    api_key = input("\n请输入你的 DeepSeek API 密钥: ").strip()
+
+    config = {"api_key": api_key}
+    with open(CONFIG_FILE, 'w', encoding='utf-8') as f:
+        json.dump(config, f, ensure_ascii=False, indent=2)
+
+    print("密钥已保存！下次运行无需重新输入。\n")
+    return config
+
+# ============ 加载配置 ============
+config = load_config()
+API_KEY = config["api_key"]
 BASE_URL = "https://api.deepseek.com/v1/chat/completions"
 MODEL = "deepseek-chat"
 
@@ -72,7 +96,7 @@ def main():
     # 获取文件路径
     while True:
         file_path = input("请输入文档路径（或拖拽文件到此处）: ").strip()
-        file_path = file_path.strip('"')  # 去掉引号
+        file_path = file_path.strip('"')
 
         if not file_path:
             continue
@@ -84,8 +108,7 @@ def main():
         if os.path.exists(file_path):
             break
         else:
-            print(f"文件不存在: {file_path}")
-            print()
+            print(f"文件不存在: {file_path}\n")
 
     # 读取文档
     print(f"\n正在读取文档...")
