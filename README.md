@@ -4,7 +4,7 @@
 
 ## 功能
 
-- 支持读取 TXT 格式文档
+- 支持读取 TXT、DOCX 格式文档
 - 基于文档内容智能回答问题
 - 支持切换不同文档
 - 支持多轮问答
@@ -40,19 +40,19 @@ cd ai-doc-qa
 在命令行中输入以下任意一个（哪个能用就用哪个）：
 
 ```
-pip install requests
+pip install requests python-docx
 ```
 
 或者：
 
 ```
-py -3 -m pip install requests
+py -3 -m pip install requests python-docx
 ```
 
 或者：
 
 ```
-python -m pip install requests
+python -m pip install requests python-docx
 ```
 
 ### 第三步：运行程序
@@ -112,7 +112,7 @@ A: 需要安装 Python 并勾选 "Add Python to PATH"。
 A: API 密钥无效或过期，请检查密钥是否正确。
 
 **Q: 支持哪些文件格式？**
-A: 目前支持 TXT 格式。
+A: 目前支持 TXT 和 DOCX 格式。
 
 ## 项目结构
 
@@ -129,3 +129,4 @@ ai-doc-qa/
 - Python 3
 - DeepSeek API（OpenAI 兼容格式）
 - requests 库
+- python-docx 库（用于读取 DOCX 文件）

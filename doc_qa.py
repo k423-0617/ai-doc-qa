@@ -2,6 +2,7 @@
 """
 AI 文档问答系统
 上传文档，基于文档内容回答问题
+支持格式：TXT、DOCX
 """
 
 import os
@@ -37,8 +38,8 @@ API_KEY = config["api_key"]
 BASE_URL = "https://api.deepseek.com/v1/chat/completions"
 MODEL = "deepseek-chat"
 
-def read_file(file_path):
-    """读取文件内容"""
+def read_txt(file_path):
+    """读取TXT文件"""
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
             return f.read()
@@ -48,8 +49,35 @@ def read_file(file_path):
                 return f.read()
         except:
             return None
+
+def read_docx(file_path):
+    """读取DOCX文件"""
+    try:
+        from docx import Document
+        doc = Document(file_path)
+        text = []
+        for para in doc.paragraphs:
+            if para.text.strip():
+                text.append(para.text)
+        return '\n'.join(text)
+    except ImportError:
+        print("读取DOCX需要安装python-docx库，请运行：py -3 -m pip install python-docx")
+        return None
     except Exception as e:
-        print(f"读取文件出错: {e}")
+        print(f"读取DOCX出错: {e}")
+        return None
+
+def read_file(file_path):
+    """根据文件类型读取内容"""
+    ext = os.path.splitext(file_path)[1].lower()
+
+    if ext == '.txt':
+        return read_txt(file_path)
+    elif ext == '.docx':
+        return read_docx(file_path)
+    else:
+        print(f"不支持的文件格式: {ext}")
+        print("目前支持：.txt、.docx")
         return None
 
 def ask_ai(document, question):
@@ -90,6 +118,7 @@ def main():
     """主函数"""
     print("=" * 50)
     print("  AI 文档问答系统 (Powered by DeepSeek)")
+    print("  支持格式：TXT、DOCX")
     print("=" * 50)
     print()
 
