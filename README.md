@@ -4,7 +4,7 @@
 
 ## 功能
 
-- 支持读取 TXT、DOCX 格式文档
+- 支持多种文档格式：TXT、DOCX、PDF、CSV、XLSX、MD、HTML
 - 基于文档内容智能回答问题
 - 支持切换不同文档
 - 支持多轮问答
@@ -40,19 +40,19 @@ cd ai-doc-qa
 在命令行中输入以下任意一个（哪个能用就用哪个）：
 
 ```
-pip install requests python-docx
+pip install requests python-docx pdfplumber openpyxl
 ```
 
 或者：
 
 ```
-py -3 -m pip install requests python-docx
+py -3 -m pip install requests python-docx pdfplumber openpyxl
 ```
 
 或者：
 
 ```
-python -m pip install requests python-docx
+python -m pip install requests python-docx pdfplumber openpyxl
 ```
 
 ### 第三步：运行程序
@@ -69,6 +69,18 @@ python doc_qa.py
 
 首次运行时，程序会提示你输入 DeepSeek API 密钥。输入后会自动保存，下次无需重新输入。
 
+## 支持的文件格式
+
+| 格式 | 说明 | 需要安装的库 |
+|------|------|-------------|
+| TXT | 纯文本文件 | 无 |
+| DOCX | Word 文档 | python-docx |
+| PDF | PDF 文档 | pdfplumber |
+| CSV | 逗号分隔值文件 | 无（Python内置） |
+| XLSX | Excel 表格 | openpyxl |
+| MD | Markdown 文件 | 无 |
+| HTML | 网页文件 | 无（Python内置） |
+
 ## 使用方法
 
 1. 运行程序后，输入文档路径（可以直接把文件拖拽到命令行窗口）
@@ -82,9 +94,10 @@ python doc_qa.py
 ```
 ==================================================
   AI 文档问答系统 (Powered by DeepSeek)
+  支持格式：TXT、DOCX、PDF、CSV、XLSX、MD、HTML
 ==================================================
 
-请输入文档路径: C:\Users\用户名\Desktop\报告.txt
+请输入文档路径: C:\Users\用户名\Desktop\报告.pdf
 
 文档读取成功！（5000 字符）
 --------------------------------------------------
@@ -93,7 +106,7 @@ python doc_qa.py
 AI: 根据文档内容，主要结论是...
 
 请输入问题: 换文档
-请输入新文档路径: C:\Users\用户名\Desktop\另一篇.txt
+请输入新文档路径: C:\Users\用户名\Desktop\数据.xlsx
 新文档读取成功！
 
 请输入问题: 退出
@@ -103,7 +116,7 @@ AI: 根据文档内容，主要结论是...
 ## 常见问题
 
 **Q: 提示"pip 不是命令"怎么办？**
-A: 试试 `python -m pip install requests`，或者检查 Python 是否安装正确。
+A: 试试 `py -3 -m pip install requests`，或者检查 Python 是否安装正确。
 
 **Q: 提示"python 不是命令"怎么办？**
 A: 需要安装 Python 并勾选 "Add Python to PATH"。
@@ -111,8 +124,11 @@ A: 需要安装 Python 并勾选 "Add Python to PATH"。
 **Q: 提示"请求出错 401"怎么办？**
 A: API 密钥无效或过期，请检查密钥是否正确。
 
-**Q: 支持哪些文件格式？**
-A: 目前支持 TXT 和 DOCX 格式。
+**Q: 提示"读取PDF需要安装pdfplumber库"怎么办？**
+A: 运行 `py -3 -m pip install pdfplumber` 安装库。
+
+**Q: 提示"读取XLSX需要安装openpyxl库"怎么办？**
+A: 运行 `py -3 -m pip install openpyxl` 安装库。
 
 ## 项目结构
 
@@ -130,3 +146,5 @@ ai-doc-qa/
 - DeepSeek API（OpenAI 兼容格式）
 - requests 库
 - python-docx 库（用于读取 DOCX 文件）
+- pdfplumber 库（用于读取 PDF 文件）
+- openpyxl 库（用于读取 XLSX 文件）

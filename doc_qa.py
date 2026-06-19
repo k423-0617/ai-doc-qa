@@ -2,7 +2,7 @@
 """
 AI 文档问答系统
 上传文档，基于文档内容回答问题
-支持格式：TXT、DOCX
+支持格式：TXT、DOCX、PDF、CSV、XLSX、MD、HTML
 """
 
 import os
@@ -38,6 +38,8 @@ API_KEY = config["api_key"]
 BASE_URL = "https://api.deepseek.com/v1/chat/completions"
 MODEL = "deepseek-chat"
 
+# ============ 文件读取函数 ============
+
 def read_txt(file_path):
     """读取TXT文件"""
     try:
@@ -67,17 +69,122 @@ def read_docx(file_path):
         print(f"读取DOCX出错: {e}")
         return None
 
+def read_pdf(file_path):
+    """读取PDF文件"""
+    try:
+        import pdfplumber
+        text = []
+        with pdfplumber.open(file_path) as pdf:
+            for page in pdf.pages:
+                page_text = page.extract_text()
+                if page_text:
+                    text.append(page_text)
+        return '\n'.join(text)
+    except ImportError:
+        print("读取PDF需要安装pdfplumber库，请运行：py -3 -m pip install pdfplumber")
+        return None
+    except Exception as e:
+        print(f"读取PDF出错: {e}")
+        return None
+
+def read_csv(file_path):
+    """读取CSV文件"""
+    try:
+        import csv
+        text = []
+        with open(file_path, 'r', encoding='utf-8') as f:
+            reader = csv.reader(f)
+            for row in reader:
+                text.append('\t'.join(row))
+        return '\n'.join(text)
+    except UnicodeDecodeError:
+        try:
+            import csv
+            text = []
+            with open(file_path, 'r', encoding='gbk') as f:
+                reader = csv.reader(f)
+                for row in reader:
+                    text.append('\t'.join(row))
+            return '\n'.join(text)
+        except:
+            return None
+
+def read_xlsx(file_path):
+    """读取XLSX文件"""
+    try:
+        import openpyxl
+        wb = openpyxl.load_workbook(file_path, read_only=True)
+        text = []
+        for sheet in wb.worksheets:
+            text.append(f"=== 工作表: {sheet.title} ===")
+            for row in sheet.iter_rows(values_only=True):
+                row_text = '\t'.join([str(cell) if cell is not None else '' for cell in row])
+                if row_text.strip():
+                    text.append(row_text)
+        return '\n'.join(text)
+    except ImportError:
+        print("读取XLSX需要安装openpyxl库，请运行：py -3 -m pip install openpyxl")
+        return None
+    except Exception as e:
+        print(f"读取XLSX出错: {e}")
+        return None
+
+def read_md(file_path):
+    """读取Markdown文件"""
+    return read_txt(file_path)
+
+def read_html(file_path):
+    """读取HTML文件"""
+    try:
+        from html.parser import HTMLParser
+        class TextExtractor(HTMLParser):
+            def __init__(self):
+                super().__init__()
+                self.text = []
+                self.skip = False
+            def handle_starttag(self, tag, attrs):
+                if tag in ['script', 'style']:
+                    self.skip = True
+            def handle_endtag(self, tag):
+                if tag in ['script', 'style']:
+                    self.skip = False
+            def handle_data(self, data):
+                if not self.skip and data.strip():
+                    self.text.append(data.strip())
+
+        with open(file_path, 'r', encoding='utf-8') as f:
+            html_content = f.read()
+
+        parser = TextExtractor()
+        parser.feed(html_content)
+        return '\n'.join(parser.text)
+    except Exception as e:
+        print(f"读取HTML出错: {e}")
+        return None
+
+# ============ 格式映射 ============
+READERS = {
+    '.txt': read_txt,
+    '.docx': read_docx,
+    '.pdf': read_pdf,
+    '.csv': read_csv,
+    '.xlsx': read_xlsx,
+    '.md': read_md,
+    '.html': read_html,
+    '.htm': read_html,
+}
+
+SUPPORTED_FORMATS = '、'.join([ext[1:].upper() for ext in READERS.keys()])
+
 def read_file(file_path):
     """根据文件类型读取内容"""
     ext = os.path.splitext(file_path)[1].lower()
 
-    if ext == '.txt':
-        return read_txt(file_path)
-    elif ext == '.docx':
-        return read_docx(file_path)
+    if ext in READERS:
+        return READERS[ext](file_path)
     else:
         print(f"不支持的文件格式: {ext}")
-        print("目前支持：.txt、.docx")
+        print(f"目前支持：{SUPPORTED_FORMATS}")
         return None
 
 def ask_ai(document, question):
@@ -118,7 +225,7 @@ def main():
     """主函数"""
     print("=" * 50)
     print("  AI 文档问答系统 (Powered by DeepSeek)")
-    print("  支持格式：TXT、DOCX")
+    print(f"  支持格式：{SUPPORTED_FORMATS}")
     print("=" * 50)
     print()
 
